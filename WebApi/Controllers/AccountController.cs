@@ -26,7 +26,6 @@ public class AccountController(IAccountService accountService):ControllerBase
             var response = new Response<RegisterDto>(HttpStatusCode.BadRequest, errorMessages);
             return StatusCode((int)response.StatusCode, response);
         }
-        
     }
     
     [HttpPost("Login")]

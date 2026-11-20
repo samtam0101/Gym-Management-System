@@ -58,17 +58,26 @@ public class AccountService(DataContext context, IConfiguration configuration, R
         return new Response<string>(HttpStatusCode.BadRequest, "login or password is incorrect");
     }
 
-    public async Task<Response<RegisterDto>> Register(RegisterDto registerDto)
+
+    public async Task<Response<string>> Register(RegisterDto model)
     {
-        var mapped = new IdentityUser()
+        try
         {
-            UserName = registerDto.Name,
-            PasswordHash = registerDto.Password,
-            Email = registerDto.Email
-        };
-        var response = await userManager.CreateAsync(mapped, registerDto.Password);
-        if (response.Succeeded == true)
-            return new Response<RegisterDto>(registerDto);
-        else return new Response<RegisterDto>(HttpStatusCode.BadRequest, "something is wrong");
+            var result = await userManager.FindByNameAsync(model.Name);
+            if (result != null) return new Response<string>(HttpStatusCode.BadRequest, "Such a user already exists!");
+            var user = new IdentityUser()
+            {
+                UserName = model.Name,
+                Email = model.Email,
+            };
+           
+            await userManager.CreateAsync(user, model.Password);
+            
+            return new Response<string>($"Done.  Your registered by id {user.Id}");
+        }
+        catch (Exception e)
+        {
+            return new Response<string>(HttpStatusCode.InternalServerError, e.Message);
+        }
     }
 }
